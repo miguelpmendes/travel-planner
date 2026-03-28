@@ -4,6 +4,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Travel Planner",
   description: "Planeamento de viagens em família",
+  appleWebApp: {
+    capable: true,
+    title: "Travel Planner",
+    statusBarStyle: "default",
+  },
 };
 
 export const viewport: Viewport = {
