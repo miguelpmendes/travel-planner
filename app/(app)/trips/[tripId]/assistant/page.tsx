@@ -22,7 +22,7 @@ export default async function AssistantPage({
   if (!trip) notFound();
 
   const messages = await db.message.findMany({
-    where: { tripId },
+    where: { tripId, userId: session!.user.id },
     orderBy: { createdAt: "asc" },
     select: { id: true, role: true, content: true },
   });

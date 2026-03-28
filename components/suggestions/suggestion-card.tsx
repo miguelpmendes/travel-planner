@@ -4,7 +4,7 @@ import { ITEM_TYPE_ICONS, ITEM_TYPE_LABELS, ITEM_TYPE_COLORS } from "@/lib/utils
 import type { Suggestion } from "@prisma/client";
 
 type SuggestionWithVotes = Suggestion & {
-  createdBy: { name: string };
+  createdBy: { name: string; avatarEmoji: string | null };
   votes: { userId: string; value: number }[];
 };
 
@@ -126,7 +126,20 @@ export function SuggestionCard({
 
             <div className="mt-3 flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2">
-                <p className="text-xs text-gray-400">por {suggestion.createdBy.name}</p>
+                <button onClick={onDetail} className="flex items-center gap-1.5 text-xs text-blue-500 hover:text-blue-700 font-medium transition-colors">
+                  Ver mais
+                </button>
+                <span className="text-gray-200">·</span>
+                <div className="flex items-center gap-1">
+                  {suggestion.createdBy.avatarEmoji ? (
+                    <span className="text-sm">{suggestion.createdBy.avatarEmoji}</span>
+                  ) : (
+                    <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold" style={{ fontSize: "9px" }}>
+                      {suggestion.createdBy.name[0]?.toUpperCase()}
+                    </div>
+                  )}
+                  <p className="text-xs text-gray-400">{suggestion.createdBy.name}</p>
+                </div>
                 {isOwner && (
                   <button
                     onClick={onEdit}

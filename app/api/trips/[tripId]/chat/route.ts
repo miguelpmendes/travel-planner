@@ -19,7 +19,7 @@ export async function GET(
   if (!member) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const messages = await db.message.findMany({
-    where: { tripId },
+    where: { tripId, userId: session.user.id },
     orderBy: { createdAt: "asc" },
     select: { id: true, role: true, content: true, createdAt: true, user: { select: { name: true } } },
   });
@@ -83,7 +83,7 @@ Responde sempre em português europeu. Sê conciso, prático e útil. Podes suge
 
   // Get conversation history (last 20 messages for context)
   const history = await db.message.findMany({
-    where: { tripId },
+    where: { tripId, userId: session.user.id },
     orderBy: { createdAt: "asc" },
     take: 20,
     select: { role: true, content: true },

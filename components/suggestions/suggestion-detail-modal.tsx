@@ -4,7 +4,7 @@ import { ITEM_TYPE_ICONS, ITEM_TYPE_LABELS, ITEM_TYPE_COLORS } from "@/lib/utils
 import type { Suggestion } from "@prisma/client";
 
 type SuggestionWithVotes = Suggestion & {
-  createdBy: { name: string };
+  createdBy: { name: string; avatarEmoji: string | null };
   votes: { userId: string; value: number }[];
 };
 
@@ -158,7 +158,16 @@ export function SuggestionDetailModal({
             )}
 
             {/* Author */}
-            <p className="mt-4 text-xs text-gray-400">Sugerido por {suggestion.createdBy.name}</p>
+            <div className="mt-4 flex items-center gap-1.5">
+              {suggestion.createdBy.avatarEmoji ? (
+                <span className="text-base">{suggestion.createdBy.avatarEmoji}</span>
+              ) : (
+                <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs">
+                  {suggestion.createdBy.name[0]?.toUpperCase()}
+                </div>
+              )}
+              <p className="text-xs text-gray-400">Sugerido por {suggestion.createdBy.name}</p>
+            </div>
           </div>
         </div>
 

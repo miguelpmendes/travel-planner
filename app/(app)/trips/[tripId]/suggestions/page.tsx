@@ -27,7 +27,7 @@ export default async function SuggestionsPage({
   const suggestions = await db.suggestion.findMany({
     where: { tripId },
     include: {
-      createdBy: { select: { name: true } },
+      createdBy: { select: { name: true, avatarEmoji: true } },
       votes: { select: { userId: true, value: true } },
     },
     orderBy: { createdAt: "desc" },

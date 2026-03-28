@@ -8,7 +8,7 @@ import { AddToItineraryModal } from "./add-to-itinerary-modal";
 import type { Suggestion, ItemType } from "@prisma/client";
 
 type SuggestionWithVotes = Suggestion & {
-  createdBy: { name: string };
+  createdBy: { name: string; avatarEmoji: string | null };
   votes: { userId: string; value: number }[];
 };
 
@@ -131,7 +131,7 @@ export function SuggestionsView({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900">Sugestões</h2>
-          <p className="text-sm text-gray-500">Vote nos sítios favoritos da família</p>
+          <p className="text-sm text-gray-500">Vota nos preferidos!</p>
         </div>
         <button
           onClick={() => setShowAdd(true)}
