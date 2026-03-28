@@ -9,7 +9,7 @@ import { AddItemModal } from "./add-item-modal";
 import type { ItineraryDay, ItineraryItem, ItemType } from "@prisma/client";
 
 type ItemWithCreator = ItineraryItem & { createdBy: { name: string } };
-type DayWithItems = ItineraryDay & { items: ItemWithCreator[] };
+type DayWithItems = ItineraryDay & { items: ItemWithCreator[]; notes: string | null };
 type TripWithDays = {
   id: string;
   days: DayWithItems[];
@@ -90,6 +90,7 @@ export function ItineraryView({ trip }: { trip: TripWithDays }) {
           <DayColumn
             key={day.id}
             day={day}
+            tripId={trip.id}
             onAddItem={() => setAddingToDayId(day.id)}
             onDeleteItem={(itemId) => handleDeleteItem(day.id, itemId)}
             onReorder={(items) => handleReorder(day.id, items)}
@@ -123,6 +124,7 @@ export function ItineraryView({ trip }: { trip: TripWithDays }) {
               <div key={day.id} className="flex-none w-full">
                 <DayColumn
                   day={day}
+                  tripId={trip.id}
                   onAddItem={() => setAddingToDayId(day.id)}
                   onDeleteItem={(itemId) => handleDeleteItem(day.id, itemId)}
                   onReorder={(items) => handleReorder(day.id, items)}
