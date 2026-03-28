@@ -1,0 +1,138 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = []
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum ItemType {
+  ATTRACTION
+  RESTAURANT
+  ACTIVITY
+  TRANSPORT
+  ACCOMMODATION
+  OTHER
+}
+
+model User {
+  id           String          @id @default(cuid())
+  name         String
+  username     String          @unique
+  email        String?         @unique
+  avatarEmoji  String?
+  passwordHash String
+  role         Role            @default(MEMBER)
+  active       Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  trips        TripMember[]
+  items        ItineraryItem[]
+  suggestions  Suggestion[]
+  votes        Vote[]
+  messages     Message[]
+}
+
+model Destination {
+  id          String  @id @default(cuid())
+  name        String
+  country     String
+  description String?
+  imageUrl    String?
+  emoji       String?
+  trips       Trip[]
+}
+
+model Trip {
+  id            String         @id @default(cuid())
+  title         String
+  destinationId String
+  destination   Destination    @relation(fields: [destinationId], references: [id])
+  startDate     DateTime
+  endDate       DateTime
+  createdAt     DateTime       @default(now())
+  members       TripMember[]
+  days          ItineraryDay[]
+  suggestions   Suggestion[]
+  messages      Message[]
+}
+
+model TripMember {
+  tripId String
+  userId String
+  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([tripId, userId])
+}
+
+model ItineraryDay {
+  id     String          @id @default(cuid())
+  tripId String
+  date   DateTime
+  trip   Trip            @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  items  ItineraryItem[]
+
+  @@unique([tripId, date])
+}
+
+model ItineraryItem {
+  id          String       @id @default(cuid())
+  dayId       String
+  day         ItineraryDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  title       String
+  type        ItemType     @default(ATTRACTION)
+  startTime   String?
+  endTime     String?
+  location     String?
+  notes        String?
+  order        Int          @default(0)
+  suggestionId String?
+  createdById  String
+  createdBy    User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt    DateTime     @default(now())
+}
+
+model Suggestion {
+  id               String     @id @default(cuid())
+  tripId           String
+  trip             Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  title            String
+  type             ItemType   @default(ATTRACTION)
+  description      String?
+  location         String?
+  url              String?
+  imageUrl         String?
+  addedToItinerary Boolean    @default(false)
+  createdById      String
+  createdBy        User       @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt        DateTime   @default(now())
+  votes            Vote[]
+}
+
+model Vote {
+  id           String     @id @default(cuid())
+  suggestionId String
+  userId       String
+  value        Int
+  suggestion   Suggestion @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([suggestionId, userId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  tripId    String
+  userId    String
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

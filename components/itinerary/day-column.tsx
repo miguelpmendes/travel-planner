@@ -1,0 +1,100 @@
+"use client";
+
+import { format, isToday } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { SortableItem } from "./sortable-item";
+import type { ItineraryDay, ItineraryItem } from "@prisma/client";
+
+type ItemWithCreator = ItineraryItem & { createdBy: { name: string } };
+type DayWithItems = ItineraryDay & { items: ItemWithCreator[] };
+
+export function DayColumn({
+  day,
+  onAddItem,
+  onDeleteItem,
+  onReorder,
+}: {
+  day: DayWithItems;
+  onAddItem: () => void;
+  onDeleteItem: (itemId: string) => void;
+  onReorder: (items: ItemWithCreator[]) => void;
+}) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } })
+  );
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = day.items.findIndex((i) => i.id === active.id);
+    const newIndex = day.items.findIndex((i) => i.id === over.id);
+    onReorder(arrayMove(day.items, oldIndex, newIndex));
+  }
+
+  const today = isToday(day.date);
+
+  return (
+    <div className="flex-none w-full md:w-64 flex flex-col">
+      <div
+        className={`flex items-center justify-between px-3 py-2 rounded-t-xl border border-b-0 ${
+          today ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-gray-200 text-gray-700"
+        }`}
+      >
+        <div>
+          <p className={`text-xs font-medium ${today ? "text-blue-100" : "text-gray-400"}`}>
+            {format(day.date, "EEEE", { locale: ptBR })}
+          </p>
+          <p className="font-bold text-base leading-tight">
+            {format(day.date, "d MMM", { locale: ptBR })}
+          </p>
+        </div>
+        <button
+          onClick={onAddItem}
+          className={`w-8 h-8 rounded-lg flex items-center justify-center text-lg font-light transition-colors ${
+            today ? "bg-blue-500 hover:bg-blue-400 text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+          }`}
+          title="Adicionar"
+        >
+          +
+        </button>
+      </div>
+
+      <div className="flex-1 border border-gray-200 rounded-b-xl bg-gray-50 p-2 min-h-[200px]">
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={day.items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-2">
+              {day.items.map((item) => (
+                <SortableItem key={item.id} item={item} onDelete={() => onDeleteItem(item.id)} />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+
+        {day.items.length === 0 && (
+          <button
+            onClick={onAddItem}
+            className="w-full h-full min-h-[140px] flex flex-col items-center justify-center text-gray-400 hover:text-gray-600 transition-colors rounded-lg border-2 border-dashed border-gray-200 hover:border-gray-300"
+          >
+            <span className="text-2xl mb-1">+</span>
+            <span className="text-xs">Adicionar</span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
