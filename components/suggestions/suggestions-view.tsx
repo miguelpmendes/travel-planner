@@ -6,6 +6,7 @@ import { SuggestionDetailModal } from "./suggestion-detail-modal";
 import { AddSuggestionModal } from "./add-suggestion-modal";
 import { AddToItineraryModal } from "./add-to-itinerary-modal";
 import type { Suggestion, ItemType } from "@prisma/client";
+import { ITEM_TYPE_ICONS, ITEM_TYPE_LABELS } from "@/lib/utils";
 
 type SuggestionWithVotes = Suggestion & {
   createdBy: { name: string; avatarEmoji: string | null };
@@ -38,8 +39,18 @@ export function SuggestionsView({
   const [detail, setDetail] = useState<SuggestionWithVotes | null>(null);
   const [editing, setEditing] = useState<SuggestionWithVotes | null>(null);
   const [addToItinerary, setAddToItinerary] = useState<SuggestionWithVotes | null>(null);
+  const [filterType, setFilterType] = useState<ItemType | null>(null);
+  const [sortOrder, setSortOrder] = useState<"votes" | "az" | "za">("votes");
 
-  const sorted = [...suggestions].sort((a, b) => score(b) - score(a));
+  const usedTypes = [...new Set(suggestions.map((s) => s.type))] as ItemType[];
+
+  const sorted = [...suggestions]
+    .filter((s) => filterType === null || s.type === filterType)
+    .sort((a, b) => {
+      if (sortOrder === "az") return a.title.localeCompare(b.title);
+      if (sortOrder === "za") return b.title.localeCompare(a.title);
+      return score(b) - score(a);
+    });
 
   async function handleVote(suggestionId: string, value: number) {
     const res = await fetch(`/api/trips/${tripId}/suggestions/${suggestionId}/vote`, {
@@ -141,16 +152,70 @@ export function SuggestionsView({
         </button>
       </div>
 
+      {suggestions.length > 0 && (
+        <div className="mb-4 space-y-2">
+          {/* Filter by type */}
+          <div className="flex flex-wrap gap-1.5">
+            <button
+              onClick={() => setFilterType(null)}
+              className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
+                filterType === null
+                  ? "bg-blue-600 border-blue-600 text-white"
+                  : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"
+              }`}
+            >
+              Todos
+            </button>
+            {usedTypes.map((type) => (
+              <button
+                key={type}
+                onClick={() => setFilterType(filterType === type ? null : type)}
+                className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
+                  filterType === type
+                    ? "bg-blue-600 border-blue-600 text-white"
+                    : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"
+                }`}
+              >
+                {ITEM_TYPE_ICONS[type]} {ITEM_TYPE_LABELS[type]}
+              </button>
+            ))}
+          </div>
+
+          {/* Sort order */}
+          <div className="flex gap-1.5">
+            {(["votes", "az", "za"] as const).map((order) => (
+              <button
+                key={order}
+                onClick={() => setSortOrder(order)}
+                className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
+                  sortOrder === order
+                    ? "bg-gray-800 border-gray-800 text-white"
+                    : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"
+                }`}
+              >
+                {order === "votes" ? "👍 Votos" : order === "az" ? "A → Z" : "Z → A"}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {sorted.length === 0 ? (
         <div className="text-center py-16">
           <div className="text-5xl mb-4">💡</div>
-          <p className="text-gray-500 mb-4">Ainda sem sugestões.</p>
-          <button
-            onClick={() => setShowAdd(true)}
-            className="px-4 py-2 bg-blue-600 text-white text-sm rounded-xl hover:bg-blue-700 transition-colors"
-          >
-            Ser o primeiro a sugerir
-          </button>
+          {suggestions.length === 0 ? (
+            <>
+              <p className="text-gray-500 mb-4">Ainda sem sugestões.</p>
+              <button
+                onClick={() => setShowAdd(true)}
+                className="px-4 py-2 bg-blue-600 text-white text-sm rounded-xl hover:bg-blue-700 transition-colors"
+              >
+                Ser o primeiro a sugerir
+              </button>
+            </>
+          ) : (
+            <p className="text-gray-500">Nenhuma sugestão para este filtro.</p>
+          )}
         </div>
       ) : (
         <div className="space-y-3">
