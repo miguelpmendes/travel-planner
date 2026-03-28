@@ -12,6 +12,7 @@ export function TripTabNav({ tripId }: { tripId: string }) {
     { href: `${base}/itinerary`, label: "📅 Itinerário" },
     { href: `${base}/suggestions`, label: "💡 Sugestões" },
     { href: `${base}/assistant`, label: "🤖 Assistente" },
+    { href: `${base}/checklist`, label: "✅ Não Esquecer" },
   ];
 
   return (

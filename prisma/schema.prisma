@@ -36,6 +36,7 @@ model User {
   suggestions  Suggestion[]
   votes        Vote[]
   messages     Message[]
+  checklist    ChecklistItem[]
 }
 
 model Destination {
@@ -60,6 +61,7 @@ model Trip {
   days          ItineraryDay[]
   suggestions   Suggestion[]
   messages      Message[]
+  checklist     ChecklistItem[]
 }
 
 model TripMember {
@@ -124,6 +126,17 @@ model Vote {
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([suggestionId, userId])
+}
+
+model ChecklistItem {
+  id          String   @id @default(cuid())
+  tripId      String
+  trip        Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  text        String
+  checked     Boolean  @default(false)
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
 }
 
 model Message {
