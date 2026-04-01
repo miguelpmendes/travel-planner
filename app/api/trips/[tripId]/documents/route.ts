@@ -47,6 +47,8 @@ export async function POST(
     return NextResponse.json({ error: "File too large (max 10 MB)" }, { status: 413 });
   }
 
+  const customName = (formData.get("name") as string | null)?.trim() || file.name;
+
   const blob = await put(`trips/${tripId}/${file.name}`, file, {
     access: "public",
     addRandomSuffix: true,
@@ -55,7 +57,7 @@ export async function POST(
   const document = await db.tripDocument.create({
     data: {
       tripId,
-      name: file.name,
+      name: customName,
       url: blob.url,
       size: file.size,
       contentType: file.type,

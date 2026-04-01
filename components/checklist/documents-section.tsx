@@ -34,18 +34,38 @@ export function DocumentsSection({
   initialDocuments: Document[];
 }) {
   const [documents, setDocuments] = useState(initialDocuments);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [pendingName, setPendingName] = useState("");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Pre-fill name with filename without extension
+    const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+    setPendingFile(file);
+    setPendingName(nameWithoutExt);
+    setError(null);
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
+  function handleCancel() {
+    setPendingFile(null);
+    setPendingName("");
+    setError(null);
+  }
+
+  async function handleConfirmUpload(e: React.FormEvent) {
+    e.preventDefault();
+    if (!pendingFile || !pendingName.trim()) return;
 
     setError(null);
     setUploading(true);
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", pendingFile);
+    formData.append("name", pendingName.trim());
 
     const res = await fetch(`/api/trips/${tripId}/documents`, {
       method: "POST",
@@ -53,7 +73,6 @@ export function DocumentsSection({
     });
 
     setUploading(false);
-    if (inputRef.current) inputRef.current.value = "";
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
@@ -63,6 +82,8 @@ export function DocumentsSection({
 
     const doc = await res.json();
     setDocuments((prev) => [doc, ...prev]);
+    setPendingFile(null);
+    setPendingName("");
   }
 
   async function handleDelete(id: string) {
@@ -75,23 +96,57 @@ export function DocumentsSection({
     <div className="mt-8">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-base font-semibold text-gray-800">Documentos</h3>
-        <label
-          className={`px-3 py-1.5 text-sm font-medium rounded-xl cursor-pointer transition-colors ${
-            uploading
-              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-blue-600 text-white hover:bg-blue-700"
-          }`}
-        >
-          {uploading ? "A carregar…" : "+ Carregar"}
-          <input
-            ref={inputRef}
-            type="file"
-            className="hidden"
-            disabled={uploading}
-            onChange={handleUpload}
-          />
-        </label>
+        {!pendingFile && (
+          <label
+            className="px-3 py-1.5 text-sm font-medium rounded-xl cursor-pointer transition-colors bg-blue-600 text-white hover:bg-blue-700"
+          >
+            + Carregar
+            <input
+              ref={inputRef}
+              type="file"
+              className="hidden"
+              onChange={handleFileSelected}
+            />
+          </label>
+        )}
       </div>
+
+      {/* Pending upload form */}
+      {pendingFile && (
+        <form
+          onSubmit={handleConfirmUpload}
+          className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-2"
+        >
+          <p className="text-xs text-blue-600 font-medium">
+            {fileIcon(pendingFile.type)} {pendingFile.name} · {formatBytes(pendingFile.size)}
+          </p>
+          <input
+            type="text"
+            value={pendingName}
+            onChange={(e) => setPendingName(e.target.value)}
+            placeholder="Nome do documento"
+            required
+            autoFocus
+            className="w-full px-3 py-2 rounded-xl border border-blue-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="flex-1 py-2 rounded-xl border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={uploading || !pendingName.trim()}
+              className="flex-1 py-2 rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+            >
+              {uploading ? "A carregar…" : "Carregar"}
+            </button>
+          </div>
+        </form>
+      )}
 
       {error && (
         <p className="mb-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
