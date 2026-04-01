@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { TripTabNav } from "@/components/trips/trip-tab-nav";
 import { ManageMembersButton } from "@/components/trips/manage-members-button";
+import { DeleteTripButton } from "@/components/trips/delete-trip-button";
 
 export default async function TripLayout({
   children,
@@ -48,7 +49,10 @@ export default async function TripLayout({
               <h1 className="font-semibold text-gray-900 truncate">{trip.title}</h1>
             </div>
             {session!.user.role === "ADMIN" && (
-              <ManageMembersButton tripId={tripId} members={members} />
+              <>
+                <ManageMembersButton tripId={tripId} members={members} />
+                <DeleteTripButton tripId={tripId} tripTitle={trip.title} />
+              </>
             )}
           </div>
           <TripTabNav tripId={tripId} />

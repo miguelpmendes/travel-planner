@@ -54,7 +54,7 @@ export function CreateTripModal({
       className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
+      <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center gap-3 mb-5">
           <span className="text-3xl">{destination.emoji ?? "🌍"}</span>
           <div>
@@ -77,7 +77,7 @@ export function CreateTripModal({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Data de início

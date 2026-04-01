@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -15,18 +16,13 @@ export async function GET(
   });
   if (!member) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const days = await db.itineraryDay.findMany({
+  const documents = await db.tripDocument.findMany({
     where: { tripId },
-    include: {
-      items: {
-        orderBy: { order: "asc" },
-        include: { createdBy: { select: { name: true } } },
-      },
-    },
-    orderBy: { date: "asc" },
+    orderBy: { createdAt: "desc" },
+    include: { createdBy: { select: { name: true } } },
   });
 
-  return NextResponse.json(days);
+  return NextResponse.json(documents);
 }
 
 export async function POST(
@@ -42,26 +38,31 @@ export async function POST(
   });
   if (!member) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const body = await req.json();
-  const { dayId, title, type, startTime, endTime, time, location, notes } = body;
+  const formData = await req.formData();
+  const file = formData.get("file") as File | null;
+  if (!file) return NextResponse.json({ error: "No file" }, { status: 400 });
 
-  const count = await db.itineraryItem.count({ where: { dayId } });
+  const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
+  if (file.size > MAX_SIZE) {
+    return NextResponse.json({ error: "File too large (max 10 MB)" }, { status: 413 });
+  }
 
-  const item = await db.itineraryItem.create({
+  const blob = await put(`trips/${tripId}/${file.name}`, file, {
+    access: "public",
+    addRandomSuffix: true,
+  });
+
+  const document = await db.tripDocument.create({
     data: {
-      dayId,
-      title,
-      type,
-      startTime,
-      endTime,
-      time,
-      location,
-      notes,
-      order: count,
+      tripId,
+      name: file.name,
+      url: blob.url,
+      size: file.size,
+      contentType: file.type,
       createdById: session.user.id,
     },
     include: { createdBy: { select: { name: true } } },
   });
 
-  return NextResponse.json(item, { status: 201 });
+  return NextResponse.json(document, { status: 201 });
 }

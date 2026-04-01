@@ -61,7 +61,7 @@ export function ManageMembersModal({
       className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl">
+      <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl max-h-[90dvh] overflow-y-auto">
         <h2 className="font-bold text-gray-900 mb-4">Membros da viagem</h2>
 
         {/* Current members */}

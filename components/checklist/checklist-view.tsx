@@ -62,7 +62,7 @@ export function ChecklistView({
   const checked = items.filter((i) => i.checked);
 
   return (
-    <div className="p-4 md:p-8 max-w-2xl mx-auto">
+    <div>
       <div className="mb-6">
         <h2 className="text-xl font-bold text-gray-900">Não Esquecer</h2>
         {items.length > 0 && (

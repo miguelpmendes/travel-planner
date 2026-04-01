@@ -10,10 +10,12 @@ type Message = {
 
 export function AssistantChat({
   tripId,
+  tripTitle,
   destination,
   initialMessages,
 }: {
   tripId: string;
+  tripTitle: string;
   destination: string;
   initialMessages: Message[];
 }) {
@@ -98,8 +100,8 @@ export function AssistantChat({
       {/* Header */}
       <div className="px-4 md:px-8 py-3 border-b border-gray-100 bg-white">
         <p className="text-sm text-gray-500">
-          🤖 Assistente especializado em{" "}
-          <span className="font-medium text-gray-700">{destination}</span>
+          🤖 Assistente para{" "}
+          <span className="font-medium text-gray-700">{tripTitle}</span>
         </p>
       </div>
 
@@ -109,7 +111,7 @@ export function AssistantChat({
           <div className="text-center py-12">
             <div className="text-4xl mb-3">🤖</div>
             <p className="text-gray-500 text-sm">
-              Olá! Sou o teu assistente de viagem.
+              Olá! Sou o teu assistente para <strong>{tripTitle}</strong>.
               <br />
               Pergunta-me sobre {destination}: restaurantes, atrações, transportes, dicas…
             </p>

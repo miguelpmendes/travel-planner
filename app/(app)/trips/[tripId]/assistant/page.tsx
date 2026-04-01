@@ -30,6 +30,7 @@ export default async function AssistantPage({
   return (
     <AssistantChat
       tripId={tripId}
+      tripTitle={trip.title}
       destination={trip.destination.name}
       initialMessages={messages}
     />

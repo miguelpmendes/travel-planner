@@ -29,12 +29,14 @@ export function DayColumn({
   onAddItem,
   onDeleteItem,
   onReorder,
+  onConfirmItem,
 }: {
   day: DayWithItems;
   tripId: string;
   onAddItem: () => void;
   onDeleteItem: (itemId: string) => void;
   onReorder: (items: ItemWithCreator[]) => void;
+  onConfirmItem: (itemId: string, confirmed: boolean) => void;
 }) {
   const [notesOpen, setNotesOpen] = useState(!!day.notes);
   const [notes, setNotes] = useState(day.notes ?? "");
@@ -105,7 +107,12 @@ export function DayColumn({
           <SortableContext items={day.items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
               {day.items.map((item) => (
-                <SortableItem key={item.id} item={item} onDelete={() => onDeleteItem(item.id)} />
+                <SortableItem
+                  key={item.id}
+                  item={item}
+                  onDelete={() => onDeleteItem(item.id)}
+                  onConfirm={(confirmed) => onConfirmItem(item.id, confirmed)}
+                />
               ))}
             </div>
           </SortableContext>
