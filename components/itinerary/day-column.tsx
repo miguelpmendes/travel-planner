@@ -30,6 +30,7 @@ export function DayColumn({
   onDeleteItem,
   onReorder,
   onConfirmItem,
+  onEditItem,
 }: {
   day: DayWithItems;
   tripId: string;
@@ -37,6 +38,7 @@ export function DayColumn({
   onDeleteItem: (itemId: string) => void;
   onReorder: (items: ItemWithCreator[]) => void;
   onConfirmItem: (itemId: string, confirmed: boolean) => void;
+  onEditItem: (itemId: string, data: { title: string; type: import("@prisma/client").ItemType; startTime: string; time: string; location: string; notes: string }) => Promise<void>;
 }) {
   const [notesOpen, setNotesOpen] = useState(!!day.notes);
   const [notes, setNotes] = useState(day.notes ?? "");
@@ -112,6 +114,7 @@ export function DayColumn({
                   item={item}
                   onDelete={() => onDeleteItem(item.id)}
                   onConfirm={(confirmed) => onConfirmItem(item.id, confirmed)}
+                  onEdit={(data) => onEditItem(item.id, data)}
                 />
               ))}
             </div>

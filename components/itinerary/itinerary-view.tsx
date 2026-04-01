@@ -20,6 +20,30 @@ export function ItineraryView({ trip }: { trip: TripWithDays }) {
   const [addingToDayId, setAddingToDayId] = useState<string | null>(null);
   const [emblaRef, emblaApi] = useEmblaCarousel({ align: "start", dragFree: true });
 
+  const handleEditItem = useCallback(
+    async (
+      dayId: string,
+      itemId: string,
+      data: { title: string; type: ItemType; startTime: string; time: string; location: string; notes: string }
+    ) => {
+      const res = await fetch(`/api/trips/${trip.id}/itinerary/${itemId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) return;
+      const updated = await res.json();
+      setDays((prev) =>
+        prev.map((d) =>
+          d.id === dayId
+            ? { ...d, items: d.items.map((i) => (i.id === itemId ? updated : i)) }
+            : d
+        )
+      );
+    },
+    [trip.id]
+  );
+
   const handleConfirmItem = useCallback(
     async (dayId: string, itemId: string, confirmed: boolean) => {
       setDays((prev) =>
@@ -114,6 +138,7 @@ export function ItineraryView({ trip }: { trip: TripWithDays }) {
             onDeleteItem={(itemId) => handleDeleteItem(day.id, itemId)}
             onReorder={(items) => handleReorder(day.id, items)}
             onConfirmItem={(itemId, confirmed) => handleConfirmItem(day.id, itemId, confirmed)}
+            onEditItem={(itemId, data) => handleEditItem(day.id, itemId, data)}
           />
         ))}
       </div>
@@ -149,6 +174,7 @@ export function ItineraryView({ trip }: { trip: TripWithDays }) {
                   onDeleteItem={(itemId) => handleDeleteItem(day.id, itemId)}
                   onReorder={(items) => handleReorder(day.id, items)}
                   onConfirmItem={(itemId, confirmed) => handleConfirmItem(day.id, itemId, confirmed)}
+            onEditItem={(itemId, data) => handleEditItem(day.id, itemId, data)}
                 />
               </div>
             ))}

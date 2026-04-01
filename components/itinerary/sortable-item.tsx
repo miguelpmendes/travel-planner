@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ITEM_TYPE_COLORS, ITEM_TYPE_ICONS, ITEM_TYPE_LABELS, PERIOD_ICONS } from "@/lib/utils";
-import type { ItineraryItem } from "@prisma/client";
+import type { ItineraryItem, ItemType } from "@prisma/client";
+import { EditItemModal } from "./edit-item-modal";
 
 type ItemWithCreator = ItineraryItem & { createdBy: { name: string } };
 
@@ -12,12 +13,15 @@ export function SortableItem({
   item,
   onDelete,
   onConfirm,
+  onEdit,
 }: {
   item: ItemWithCreator;
   onDelete: () => void;
   onConfirm: (confirmed: boolean) => void;
+  onEdit: (data: { title: string; type: ItemType; startTime: string; time: string; location: string; notes: string }) => Promise<void>;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: item.id });
@@ -60,6 +64,16 @@ export function SortableItem({
             </button>
 
             <div className="flex items-center gap-0.5 flex-none">
+              {/* Edit button */}
+              <button
+                onClick={() => setEditing(true)}
+                className="p-1 rounded transition-colors text-sm text-gray-300 hover:text-blue-500 opacity-0 group-hover:opacity-100"
+                aria-label="Editar"
+                title="Editar atividade"
+              >
+                ✏️
+              </button>
+
               {/* Confirm toggle */}
               <button
                 onClick={() => onConfirm(!item.confirmed)}
@@ -127,6 +141,17 @@ export function SortableItem({
           )}
         </div>
       </div>
+
+      {editing && (
+        <EditItemModal
+          item={item}
+          onClose={() => setEditing(false)}
+          onSave={async (data) => {
+            await onEdit(data);
+            setEditing(false);
+          }}
+        />
+      )}
     </div>
   );
 }
