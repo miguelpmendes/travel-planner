@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ITEM_TYPE_LABELS, PERIOD_ICONS, getPeriodsForType } from "@/lib/utils";
 import type { ItineraryItem, ItemType } from "@prisma/client";
+import { TimeSelect } from "./time-select";
 
 const TYPES = Object.values(["ATTRACTION", "RESTAURANT", "ACTIVITY", "TRANSPORT", "ACCOMMODATION", "OTHER"] as ItemType[]);
 
@@ -108,12 +109,7 @@ export function EditItemModal({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Hora</label>
-            <input
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <TimeSelect value={time} onChange={setTime} />
           </div>
 
           <div>
