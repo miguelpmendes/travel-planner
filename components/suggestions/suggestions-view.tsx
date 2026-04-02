@@ -40,12 +40,14 @@ export function SuggestionsView({
   const [editing, setEditing] = useState<SuggestionWithVotes | null>(null);
   const [addToItinerary, setAddToItinerary] = useState<SuggestionWithVotes | null>(null);
   const [filterType, setFilterType] = useState<ItemType | null>(null);
+  const [filterAdded, setFilterAdded] = useState<boolean | null>(null);
   const [sortOrder, setSortOrder] = useState<"votes" | "az" | "za">("votes");
 
   const usedTypes = [...new Set(suggestions.map((s) => s.type))] as ItemType[];
 
   const sorted = [...suggestions]
     .filter((s) => filterType === null || s.type === filterType)
+    .filter((s) => filterAdded === null || s.addedToItinerary === filterAdded)
     .sort((a, b) => {
       if (sortOrder === "az") return a.title.localeCompare(b.title);
       if (sortOrder === "za") return b.title.localeCompare(a.title);
@@ -179,6 +181,26 @@ export function SuggestionsView({
                 {ITEM_TYPE_ICONS[type]} {ITEM_TYPE_LABELS[type]}
               </button>
             ))}
+          </div>
+
+          {/* Filter by itinerary status */}
+          <div className="flex gap-1.5">
+            {([null, false, true] as const).map((value) => {
+              const label = value === null ? "Todas" : value === false ? "Pendentes" : "✓ No itinerário";
+              return (
+                <button
+                  key={String(value)}
+                  onClick={() => setFilterAdded(value)}
+                  className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
+                    filterAdded === value
+                      ? "bg-gray-800 border-gray-800 text-white"
+                      : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Sort order */}

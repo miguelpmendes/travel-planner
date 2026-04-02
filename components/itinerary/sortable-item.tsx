@@ -104,8 +104,8 @@ export function SortableItem({
         </button>
       )}
 
-      {/* Action buttons — bottom row, visible on hover */}
-      <div className="mt-2 ml-6 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      {/* Action buttons — bottom row */}
+      <div className="mt-2 ml-6 flex items-center gap-2">
         <button
           onClick={() => setEditing(true)}
           className="text-xs text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-0.5"
