@@ -37,7 +37,7 @@ export function SuggestionCard({
   const canDelete = isOwner || isAdmin;
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
       <div className="p-4">
         <div className="flex items-start gap-3">
           {/* Rank badge */}
