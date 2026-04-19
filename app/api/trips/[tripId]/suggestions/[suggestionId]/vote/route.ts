@@ -42,7 +42,7 @@ export async function POST(
 
   const votes = await db.vote.findMany({
     where: { suggestionId },
-    select: { userId: true, value: true },
+    select: { userId: true, value: true, user: { select: { name: true } } },
   });
 
   return NextResponse.json(votes);

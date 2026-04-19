@@ -19,7 +19,7 @@ export async function GET(
     where: { tripId },
     include: {
       createdBy: { select: { name: true } },
-      votes: { select: { userId: true, value: true } },
+      votes: { select: { userId: true, value: true, user: { select: { name: true } } } },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -55,7 +55,7 @@ export async function POST(
     },
     include: {
       createdBy: { select: { name: true } },
-      votes: { select: { userId: true, value: true } },
+      votes: { select: { userId: true, value: true, user: { select: { name: true } } } },
     },
   });
 

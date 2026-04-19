@@ -5,7 +5,7 @@ import type { Suggestion } from "@prisma/client";
 
 type SuggestionWithVotes = Suggestion & {
   createdBy: { name: string; avatarEmoji: string | null };
-  votes: { userId: string; value: number }[];
+  votes: { userId: string; value: number; user: { name: string } }[];
 };
 
 export function SuggestionDetailModal({
@@ -32,6 +32,8 @@ export function SuggestionDetailModal({
   const totalScore = suggestion.votes.reduce((acc, v) => acc + v.value, 0);
   const myVote = suggestion.votes.find((v) => v.userId === currentUserId)?.value ?? 0;
   const isOwner = suggestion.createdById === currentUserId;
+  const yesVoters = suggestion.votes.filter((v) => v.value === 1).map((v) => v.user.name);
+  const noVoters = suggestion.votes.filter((v) => v.value === -1).map((v) => v.user.name);
   const canDelete = isOwner || isAdmin;
 
   return (
@@ -104,17 +106,27 @@ export function SuggestionDetailModal({
 
             {/* Vote score */}
             <div className="flex items-center gap-2 mt-3">
-              <button
-                onClick={() => onVote(1)}
-                className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg transition-colors ${
-                  myVote === 1
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-400 hover:bg-green-50 hover:text-green-600"
-                }`}
-                aria-label="Voto positivo"
-              >
-                👍
-              </button>
+              <div className="relative group/yes">
+                <button
+                  onClick={() => onVote(1)}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg transition-colors ${
+                    myVote === 1
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-100 text-gray-400 hover:bg-green-50 hover:text-green-600"
+                  }`}
+                  aria-label="Voto positivo"
+                >
+                  👍
+                </button>
+                {yesVoters.length > 0 && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/yes:block z-20 pointer-events-none">
+                    <div className="bg-gray-900 text-white text-xs rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-lg">
+                      <span className="font-semibold text-green-400">Sim:</span> {yesVoters.join(", ")}
+                    </div>
+                    <div className="w-2 h-2 bg-gray-900 rotate-45 mx-auto -mt-1" />
+                  </div>
+                )}
+              </div>
               <span
                 className={`text-sm font-bold w-6 text-center ${
                   totalScore > 0 ? "text-green-600" : totalScore < 0 ? "text-red-600" : "text-gray-400"
@@ -122,17 +134,27 @@ export function SuggestionDetailModal({
               >
                 {totalScore > 0 ? `+${totalScore}` : totalScore}
               </span>
-              <button
-                onClick={() => onVote(-1)}
-                className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg transition-colors ${
-                  myVote === -1
-                    ? "bg-red-100 text-red-700"
-                    : "bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500"
-                }`}
-                aria-label="Voto negativo"
-              >
-                👎
-              </button>
+              <div className="relative group/no">
+                <button
+                  onClick={() => onVote(-1)}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg transition-colors ${
+                    myVote === -1
+                      ? "bg-red-100 text-red-700"
+                      : "bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500"
+                  }`}
+                  aria-label="Voto negativo"
+                >
+                  👎
+                </button>
+                {noVoters.length > 0 && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/no:block z-20 pointer-events-none">
+                    <div className="bg-gray-900 text-white text-xs rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-lg">
+                      <span className="font-semibold text-red-400">Não:</span> {noVoters.join(", ")}
+                    </div>
+                    <div className="w-2 h-2 bg-gray-900 rotate-45 mx-auto -mt-1" />
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Description */}

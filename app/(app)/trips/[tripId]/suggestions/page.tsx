@@ -28,7 +28,7 @@ export default async function SuggestionsPage({
     where: { tripId },
     include: {
       createdBy: { select: { name: true, avatarEmoji: true } },
-      votes: { select: { userId: true, value: true } },
+      votes: { select: { userId: true, value: true, user: { select: { name: true } } } },
     },
     orderBy: { createdAt: "desc" },
   });

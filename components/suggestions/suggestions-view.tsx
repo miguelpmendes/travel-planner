@@ -10,7 +10,7 @@ import { ITEM_TYPE_ICONS, ITEM_TYPE_LABELS } from "@/lib/utils";
 
 type SuggestionWithVotes = Suggestion & {
   createdBy: { name: string; avatarEmoji: string | null };
-  votes: { userId: string; value: number }[];
+  votes: { userId: string; value: number; user: { name: string } }[];
 };
 
 type Day = { id: string; date: Date };
